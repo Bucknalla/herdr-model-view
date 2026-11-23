@@ -83,6 +83,27 @@ herdr-app do tab.new --name part --mod model-view --props '{"file":"/path/to/par
 
 Without `props`, the pane lists the models it finds.
 
+### For coding agents
+
+An agent in a Herdr terminal can open a model beside itself. Herdr puts the
+agent's terminal id in `HC_TERMINAL_ID`; split that terminal's pane, not the
+focused one (which may be in another tab):
+
+```sh
+pane=$(herdr-app ls | python3 -c 'import json,os,sys
+for s in json.load(sys.stdin)["spaces"]:
+  for t in s["tabs"]:
+    for x in t["terminals"]:
+      if x["terminal"].split("/")[-1] == os.environ["HC_TERMINAL_ID"]: print(x["pane"])')
+herdr-app do pane.split --pane "$pane" --direction right --mod model-view --props '{"file":"/abs/path/part.step"}'
+```
+
+The pane re-renders when the file changes, so after an agent exports the
+model again (from FreeCAD, OpenSCAD, CadQuery, ...) there is no need to open
+it again. Tell your agent with a line in its instructions (`CLAUDE.md`,
+`AGENTS.md`), for example: "To show me a 3D model in Herdr, open it in a
+model-view pane beside your own pane (see github.com/Bucknalla/herdr-model-view)."
+
 ### Commands
 
 Bind them in `keys.json` or run them with `herdr-app do` (shown panes only):
